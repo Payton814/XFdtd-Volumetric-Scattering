@@ -7,7 +7,30 @@
 #   from the Ulaby mie scattering matlab code
 #
 #####################################################################################
-
+#
+#   How to use:     You will need to make sure that the df_matlab is reading the correct
+#                   CSV file. This may mean you have to change your path to wherever
+#                   it was saved.
+#
+#                   The github as of this writing has data for rocks embedded in regolith
+#                   as well as cavities in ice. MAKE SURE you have the file names correct
+#                   so that the data being accessed is the correct one.
+#                   for instance, for rock/regolith data folder will have: regbk_rock
+#
+#                   The data and folders are formatted such that you can know some of the
+#                   basic XFdtd simulation set up. 
+#                   EXAMPLE:    0.5r --> the simulation was populated with scatterers with
+#                                        radius = 0.5 m
+#
+#                               28a14b --> the simulation was placed in a waveguide with 
+#                                        width, a = 28 m, and height, b = 14 m
+#
+#                               8d --> The distance inside the waveguide actually populated
+#                                      by scatterers was d = 8 m
+#
+#                               250f --> The driving frequency for the TE10 mode was f = 250MHz
+#
+#####################################################################################
 
 import pandas as pd
 import numpy as np
@@ -15,20 +38,17 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from S_param_df_gen import SP_df_gen
 
-#Folder = "VS_0.01p_24d_15modes"
-#Folder = "s_params_5by10by10"
-#PATH = "C:/Users/Payton/Desktop/Research/Beatty_Lab/CoRaLS/VS/0.3r_0.01p_rand/" + Folder + "/s_param"
 
 
 
 r = 0.5
 porosity = 0.005
-datalength = 20
+datalength = 30
 a = 28
 b = 14
-f = 250
+f = 100
 
-df_matlab = pd.read_csv("./VS_regbk_rock_0.5r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
+df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
 iter = 0
 while True:
     if df_matlab['Radius'][iter] == r:
