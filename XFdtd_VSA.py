@@ -31,6 +31,16 @@
 #                               250f --> The driving frequency for the TE10 mode was f = 250MHz
 #
 #####################################################################################
+# TODO:
+#  - render plots with LaTeX labels
+#  - get rid of unused variables
+#  - add plot titles
+#  - expand plot range of spread to emphasize the small deviation. current plot doesn't tell us much visually
+# REVISIONS: 22-Jan-2024
+#  - deleted declaration of ts_err array and Sf10 array.
+#  - deleted calculation of sphere volume
+#  - commented out creation of S2sum[]
+#  - replaced while loop method of getting CS_M and Qs_M
 
 import pandas as pd
 import numpy as np
@@ -38,42 +48,48 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from S_param_df_gen import SP_df_gen
 
+# CONSTANTS
+r = 0.5             # scatterer radius, meters
+porosity = 0.005    # sample porosity (VOID VOLUME / TOTAL VOLUME)
+datalength = 33     # TODO: What is this for? Why choose this value?
+a = 28              # waveguide width, meters
+b = 14              # waveguide height, meters
+f = 250             # wave frequency, MHz
 
-
-
-r = 0.5
-porosity = 0.005
-datalength = 33
-a = 28
-b = 14
-f = 250
-
+# read in CSV to np DataFrame df_matlab, calculate CS_M, Qs_M
 df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
-iter = 0
-while True:
-    if df_matlab['Radius'][iter] == r:
-        CS_M = df_matlab['Qs'][iter]
-        break
-    iter += 1
-Qs_M = CS_M/(np.pi*r**2)
+step_size = 0.001
+loc = r / step_size
+CS_M = df_matlab['Qs'][loc]
+Qs_M = CS_M / (np.pi*r**2)
 
+# I think we can replace the following while loop to just get df_matlab['Qs'][n]
+# n = r / csv_step_size
+# In the case of our current .csv files, n = 500 every time.
+# iter = 0
+# while True:
+#     if df_matlab['Radius'][iter] == r:
+#         CS_M = df_matlab['Qs'][iter]    # What is this? Why do we get it from r = 0.5
+#         break
+#     iter += 1
+# Qs_M = CS_M / (np.pi*r**2)    # what is Qs_M? Isn't the data from XF already Qs based on column name? Why divide by scatterer cross section?
+
+# TODO: IMPROVE VARIABLE NAMES / DOCUMENTATION. No idea what any of these are currently.
 ddf = []
-S2sum = []
-ts_err = []
-Sf10 = []
-numModes = 1
+# S2sum = []      # Do we need this?
+numModes = 1        
 d_xf = np.arange(5, datalength + 5, 1)
-d = np.arange(0,datalength + 5,1)
-V_s = (4/3)*np.pi*(r)**3
+d = np.arange(0,datalength + 5,1)       
 
 
 for i in range(datalength):
     print("Getting " + str(5+i))
+    # create PATH string to the .csv we want to parse with SP_df_gen()
     Folder = "SP_" + str(porosity) + "p_1m_" + str(a) + "a" + str(b) + "b_" + str(f) + "f/"
     File = str(5 + i) + "d/"
     PATH = "./VS_regbk_rock_" + str(r) + "r/" + Folder + File + "/s_param"
-    df, SP = SP_df_gen(PATH, num_modes=1)
-    S2sum.append(SP[3][0])
+    df, SP = SP_df_gen(PATH, num_modes=numModes)
+    # S2sum.append(SP[3][0])  
     ddf.append((df, SP))
 
 
@@ -91,7 +107,7 @@ for i in range(datalength):
     # Optical depth can be defined as natural log of incident to transmitted power
     # In XF the scattering parameters correspond to the amount of the incident power
     # that scatters into a particular mode inside a waveguide. Therefore any forward
-    # scattering will result in transmited power. What we are really interested in
+    # scattering will result in transmitted power. What we are really interested in
     # is the amount still in the original mode. Then the optical depth is -ln(Sf11^2)
 
     tau.append(-np.log(M))
@@ -111,6 +127,7 @@ mu, std = stats.norm.fit(np.divide(tau, d_xf))
 print("average value is: ", mu)
 print("standard deviation is: ", std)
 
+# PLOT RESULTS
 plt.plot(d, optical_depth_M, label = "MATLAB optical depth, ks = " + str(ks))
 plt.plot(d_xf, tau, "D", label = "XFdtd optical depth")
 
