@@ -41,12 +41,14 @@ from S_param_df_gen import SP_df_gen
 
 
 
-r = 0.5
+r = 0.3
 porosity = 0.005
-datalength = 33
+datalength = 40
 a = 28
 b = 14
-f = 250
+f = 100
+nbk = 3.01
+ns = 6.01
 
 df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
 iter = 0
@@ -59,8 +61,6 @@ Qs_M = CS_M/(np.pi*r**2)
 
 ddf = []
 S2sum = []
-ts_err = []
-Sf10 = []
 numModes = 1
 d_xf = np.arange(5, datalength + 5, 1)
 d = np.arange(0,datalength + 5,1)
@@ -146,12 +146,12 @@ plt.legend()
 
 plt.show()
 
-
-std_l = [0.007405, 0.003457, 0.002695, 0.001981]
+## right now this next bit of code only makes sense when looking at the r = 0.5m, f = 250MHz cases
+'''std_l = [0.007405, 0.003457, 0.002695, 0.001981]
 
 plt.plot([14*7, 20*10, 22*11, 28*14], std_l, linestyle = "--", marker = "o", label = "data")
-plt.plot([14*7, 20*10, 22*11, 28*14], [r/(14*7*0.5), r/(20*10*0.5), r/(22*11*0.5), r/(28*14*0.5)], label = "r/(ab*porosity)")
+plt.plot([14*7, 20*10, 22*11, 28*14], [r/(14*7*0.5)*np.sqrt(nbk/ns), r/(20*10*0.5)*np.sqrt(nbk/ns), r/(22*11*0.5)*np.sqrt(nbk/ns), r/(28*14*0.5)*np.sqrt(nbk/ns)], label = "r/(ab*porosity)")
 plt.xlabel("ab [m^2]")
 plt.ylabel("standard deviation")
 plt.legend()
-plt.show()
+plt.show()'''
