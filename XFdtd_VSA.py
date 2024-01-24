@@ -37,6 +37,7 @@
 #  - add plot titles
 #  - expand plot range of spread to emphasize the small deviation. current plot doesn't tell us much visually
 #  - figure out what ddf[], d_xf[], and d[] are.
+#  - improve description of the numModes variable
 # REVISIONS: 
 # 22-Jan-2024
 #  - deleted declaration of ts_err array and Sf10 array.
@@ -46,6 +47,8 @@
 # 23-Jan-2024
 #  - deleted S2sum[] instances
 #  - deleted old while loop method to calculate CS_M and Qs_M
+# 24-Jan-2024
+#  - added some LaTeX labels to plots
 
 import pandas as pd
 import numpy as np
@@ -61,6 +64,7 @@ a = 28              # waveguide width, meters
 b = 14              # waveguide height, meters
 f = 250             # wave frequency, MHz
 step_size = 0.001   # radius increment size in .csv files produced by MATLAB
+numModes = 1        # number of wave modes in our infinite series that we are concerned with
 
 # read in CSV to np DataFrame df_matlab, calculate CS_M, Qs_M
 df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
@@ -70,10 +74,10 @@ CS_M = df_matlab['Qs'][loc]
 Qs_M = CS_M / (np.pi*r**2)
 
 # TODO: IMPROVE VARIABLE NAMES / DOCUMENTATION. No idea what any of these are currently.
-ddf = []
-numModes = 1        
-d_xf = np.arange(5, datalength + 5, 1)
-d = np.arange(0,datalength + 5,1)       
+ddf = []    # stores tuples of results of SP_df_gen()
+   
+d_xf = np.arange(5, datalength + 5)      # [5, 6, 7, ... , datalength + 4]
+d    = np.arange(0, datalength + 5)      # [0, 1, 2, ... , datalength + 4]
 
 # why do we iterate datalength times?
 for i in range(datalength):
@@ -84,7 +88,8 @@ for i in range(datalength):
     File = str(5 + i) + "d/"
     PATH = "./VS_regbk_rock_" + str(r) + "r/" + Folder + File + "/s_param"
     
-    df, SP = SP_df_gen(PATH, num_modes=numModes)
+    # this function can be found in ~/S_param_df_gen.py
+    df, SP = SP_df_gen(PATH, num_modes=numModes) 
     ddf.append((df, SP))
 
 print(d_xf)
@@ -92,7 +97,7 @@ print(d_xf)
 # unsure of what each of these arrays is for / whether they are needed.
 M = []
 S2f = []
-optical_depth_XF = []
+optical_depth_XF = []  # we can get rid of this? 
 tau = []
 
 # I believe we could do this within the first 'for' loop above, as long as we declare the above arrays prior to that loop.
@@ -133,7 +138,7 @@ plt.plot(d, res.intercept + res.slope*d, 'r', label='fitted line, slope ks = ' +
 
 plt.ylabel("Optical Depth, ts [unitless]")
 plt.xlabel("Volume Thickness, d [m]")
-plt.title("Optical depth for " + str(r) +"m radius sphere at " + str(f) + "MHz, porosity = " +str(porosity))
+plt.title("Optical depth for " + str(r) +"m radius sphere at " + str(f) + "MHz, $\\phi$ = " +str(porosity))
 plt.legend()
 
 plt.show()
@@ -165,8 +170,8 @@ plt.show()
 std_l = [0.007405, 0.003457, 0.002695, 0.001981]
 
 plt.plot([14*7, 20*10, 22*11, 28*14], std_l, linestyle = "--", marker = "o", label = "data")
-plt.plot([14*7, 20*10, 22*11, 28*14], [r/(14*7*0.5), r/(20*10*0.5), r/(22*11*0.5), r/(28*14*0.5)], label = "r/(ab*porosity)")
-plt.xlabel("ab [m^2]")
-plt.ylabel("standard deviation")
+plt.plot([14*7, 20*10, 22*11, 28*14], [r/(14*7*0.5), r/(20*10*0.5), r/(22*11*0.5), r/(28*14*0.5)], label = "r / $\\phi ab$")
+plt.xlabel("ab [$\\rm m^2$]")
+plt.ylabel("$\\sigma$")
 plt.legend()
 plt.show()
