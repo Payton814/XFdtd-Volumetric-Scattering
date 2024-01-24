@@ -69,7 +69,7 @@ numModes = 1        # number of wave modes in our infinite series that we are co
 # read in CSV to np DataFrame df_matlab, calculate CS_M, Qs_M
 df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
 
-loc = r / step_size
+loc = r / step_size    # location within MATLAB-produced .csv of CS_M
 CS_M = df_matlab['Qs'][loc]
 Qs_M = CS_M / (np.pi*r**2)
 
@@ -97,7 +97,7 @@ print(d_xf)
 # unsure of what each of these arrays is for / whether they are needed.
 M = []
 S2f = []
-optical_depth_XF = []  # we can get rid of this? 
+# optical_depth_XF = []  # we can get rid of this? 
 tau = []
 
 # I believe we could do this within the first 'for' loop above, as long as we declare the above arrays prior to that loop.
@@ -114,7 +114,7 @@ for i in range(datalength):
     # is the amount still in the original mode. Then the optical depth is -ln(Sf11^2)
 
     tau.append(-np.log(M))
-print('length of optical:', len(optical_depth_XF))
+#print('length of optical:', len(optical_depth_XF))  # doesn't tell us anything because we don't give anything to this array
 
 print("S forward", S2f)
 #print(type(optical_depth_XF[:][0]))
