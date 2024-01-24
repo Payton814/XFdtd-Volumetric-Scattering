@@ -36,11 +36,16 @@
 #  - get rid of unused variables
 #  - add plot titles
 #  - expand plot range of spread to emphasize the small deviation. current plot doesn't tell us much visually
-# REVISIONS: 22-Jan-2024
+#  - figure out what ddf[], d_xf[], and d[] are.
+# REVISIONS: 
+# 22-Jan-2024
 #  - deleted declaration of ts_err array and Sf10 array.
 #  - deleted calculation of sphere volume
 #  - commented out creation of S2sum[]
 #  - replaced while loop method of getting CS_M and Qs_M
+# 23-Jan-2024
+#  - deleted S2sum[] instances
+#  - deleted old while loop method to calculate CS_M and Qs_M
 
 import pandas as pd
 import numpy as np
@@ -48,56 +53,49 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from S_param_df_gen import SP_df_gen
 
-# CONSTANTS
+# MODIFIABLE PARAMETERS
 r = 0.5             # scatterer radius, meters
 porosity = 0.005    # sample porosity (VOID VOLUME / TOTAL VOLUME)
 datalength = 33     # TODO: What is this for? Why choose this value?
 a = 28              # waveguide width, meters
 b = 14              # waveguide height, meters
 f = 250             # wave frequency, MHz
+step_size = 0.001   # radius increment size in .csv files produced by MATLAB
 
 # read in CSV to np DataFrame df_matlab, calculate CS_M, Qs_M
 df_matlab = pd.read_csv("./VS_regbk_rock_" + str(r) + "r/CS_regbk_rockbk_" + str(f) + "MHz_0.001_step.csv")
-step_size = 0.001
+
 loc = r / step_size
 CS_M = df_matlab['Qs'][loc]
 Qs_M = CS_M / (np.pi*r**2)
 
-# I think we can replace the following while loop to just get df_matlab['Qs'][n]
-# n = r / csv_step_size
-# In the case of our current .csv files, n = 500 every time.
-# iter = 0
-# while True:
-#     if df_matlab['Radius'][iter] == r:
-#         CS_M = df_matlab['Qs'][iter]    # What is this? Why do we get it from r = 0.5
-#         break
-#     iter += 1
-# Qs_M = CS_M / (np.pi*r**2)    # what is Qs_M? Isn't the data from XF already Qs based on column name? Why divide by scatterer cross section?
-
 # TODO: IMPROVE VARIABLE NAMES / DOCUMENTATION. No idea what any of these are currently.
 ddf = []
-# S2sum = []      # Do we need this?
 numModes = 1        
 d_xf = np.arange(5, datalength + 5, 1)
 d = np.arange(0,datalength + 5,1)       
 
-
+# why do we iterate datalength times?
 for i in range(datalength):
     print("Getting " + str(5+i))
-    # create PATH string to the .csv we want to parse with SP_df_gen()
+    
+    # create PATH string to the .csv we want to parse with SP_df_gen(). Path and file name will change dependent on global variables
     Folder = "SP_" + str(porosity) + "p_1m_" + str(a) + "a" + str(b) + "b_" + str(f) + "f/"
     File = str(5 + i) + "d/"
     PATH = "./VS_regbk_rock_" + str(r) + "r/" + Folder + File + "/s_param"
+    
     df, SP = SP_df_gen(PATH, num_modes=numModes)
-    # S2sum.append(SP[3][0])  
     ddf.append((df, SP))
 
-
 print(d_xf)
-M =[]
+
+# unsure of what each of these arrays is for / whether they are needed.
+M = []
 S2f = []
 optical_depth_XF = []
 tau = []
+
+# I believe we could do this within the first 'for' loop above, as long as we declare the above arrays prior to that loop.
 for i in range(datalength):
     S2f.append(ddf[i][1][1][0])
 
